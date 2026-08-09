@@ -1,0 +1,2305 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Obfr — Obfuscateur JavaScript</title>
+<meta name="description" content="Rends ton code JavaScript illisible. Tout se passe dans ton navigateur.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/javascript-obfuscator/dist/index.browser.js"></script>
+
+<style>
+:root{
+  --bg:#0A0B0D;
+  --bg-panel:#131519;
+  --bg-panel-2:#16181D;
+  --border:#23262C;
+  --border-soft:#1B1D22;
+  --text:#E6E7EA;
+  --text-dim:#888D96;
+  --text-faint:#52565E;
+  --accent:#6C8CFF;
+  --accent-soft:rgba(108,140,255,0.14);
+  --accent-dim:#3A4470;
+  --mono:'IBM Plex Mono','SFMono-Regular',monospace;
+  --sans:'Inter',-apple-system,sans-serif;
+  --radius:10px;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+.wrap{
+  max-width:1080px;
+  margin:0 auto;
+  padding:0 24px;
+}
+
+a,
+button{
+  font-family:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+@media(prefers-reduced-motion:reduce){
+  *{
+    animation:none!important;
+    transition:none!important;
+  }
+}
+
+/* =========================
+   TOPBAR
+========================= */
+
+.topbar{
+  border-bottom:1px solid var(--border-soft);
+  padding:18px 0;
+}
+
+.topbar-inner{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.brand{
+  font-family:var(--mono);
+  font-weight:600;
+  font-size:18px;
+  letter-spacing:-0.02em;
+}
+
+.brand-dot{
+  color:var(--accent);
+}
+
+.topbar-tag{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--text-faint);
+}
+
+.translate-btn{
+  margin-left:auto;
+  background:var(--bg-panel-2);
+  color:var(--text-dim);
+  border:1px solid var(--border);
+  border-radius:7px;
+  padding:7px 11px;
+  font-family:var(--mono);
+  font-size:11px;
+  font-weight:600;
+  transition:border-color .15s,color .15s,background .15s;
+}
+
+.translate-btn:hover{
+  border-color:var(--accent-dim);
+  color:var(--accent);
+  background:var(--accent-soft);
+}
+
+/* =========================
+   HERO
+========================= */
+
+.hero{
+  padding:72px 0 48px;
+}
+
+.hero-title{
+  font-family:var(--sans);
+  font-weight:700;
+  font-size:clamp(34px,6vw,56px);
+  line-height:1.08;
+  letter-spacing:-0.02em;
+  margin:0 0 20px;
+}
+
+.scramble-word{
+  font-family:var(--mono);
+  color:var(--accent);
+  font-weight:500;
+}
+
+.hero-sub{
+  color:var(--text-dim);
+  font-size:17px;
+  max-width:620px;
+  margin:0 0 40px;
+}
+
+.hero-demo{
+  background:var(--bg-panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  max-width:620px;
+}
+
+.demo-line.demo-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px 14px;
+  border-bottom:1px solid var(--border-soft);
+}
+
+.dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--border);
+  display:inline-block;
+}
+
+.demo-filename{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--text-faint);
+  margin-left:6px;
+}
+
+.demo-code{
+  margin:0;
+  padding:18px 16px;
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--text-dim);
+  min-height:96px;
+  white-space:pre-wrap;
+  word-break:break-all;
+}
+
+/* =========================
+   STEPS
+========================= */
+
+.steps{
+  border-top:1px solid var(--border-soft);
+  border-bottom:1px solid var(--border-soft);
+  padding:40px 0;
+}
+
+.steps-inner{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:28px;
+}
+
+.step-num{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--accent);
+}
+
+.step h3{
+  font-size:16px;
+  margin:8px 0 4px;
+}
+
+.step p{
+  font-size:14px;
+  color:var(--text-dim);
+  margin:0;
+}
+
+/* =========================
+   WORKBENCH
+========================= */
+
+.bench{
+  padding:56px 0;
+}
+
+.bench-inner{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:20px;
+  align-items:start;
+}
+
+.panel{
+  background:var(--bg-panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+}
+
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:14px;
+}
+
+.panel-head-sub{
+  margin-top:22px;
+}
+
+.panel-label{
+  font-family:var(--mono);
+  font-size:11px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--text-faint);
+}
+
+/* Dropzone */
+
+.dropzone{
+  border:1px dashed var(--border);
+  border-radius:var(--radius);
+  padding:28px 16px;
+  text-align:center;
+  transition:border-color .15s,background .15s;
+}
+
+.dropzone.is-drag{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+}
+
+.dz-title{
+  margin:0 0 4px;
+  font-size:14px;
+}
+
+.dz-sub{
+  margin:0;
+  font-size:13px;
+  color:var(--text-dim);
+}
+
+.dz-file{
+  margin:10px 0 0;
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--accent);
+  min-height:16px;
+}
+
+.link-btn{
+  background:none;
+  border:none;
+  padding:0;
+  color:var(--accent);
+  text-decoration:underline;
+  text-underline-offset:2px;
+  font-size:13px;
+}
+
+.or-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:16px 0 10px;
+}
+
+.or-row span{
+  font-size:12px;
+  color:var(--text-faint);
+}
+
+.or-row::before,
+.or-row::after{
+  content:"";
+  flex:1;
+  height:1px;
+  background:var(--border-soft);
+}
+
+.code-textarea{
+  width:100%;
+  min-height:160px;
+  resize:vertical;
+  background:var(--bg-panel-2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  color:var(--text);
+  font-family:var(--mono);
+  font-size:13px;
+  padding:12px;
+  line-height:1.5;
+}
+
+.code-textarea::placeholder{
+  color:var(--text-faint);
+}
+
+/* =========================
+   OPTIONS
+========================= */
+
+.preset-row{
+  display:grid;
+  gap:8px;
+}
+
+.preset-btn{
+  text-align:left;
+  background:var(--bg-panel-2);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  transition:border-color .15s,background .15s;
+}
+
+.preset-btn:hover{
+  border-color:var(--accent-dim);
+}
+
+.preset-btn.is-active{
+  border-color:var(--accent);
+  background:var(--accent-soft);
+}
+
+.preset-name{
+  font-size:14px;
+  font-weight:600;
+}
+
+.preset-desc{
+  font-size:12px;
+  color:var(--text-dim);
+}
+
+.toggle-list{
+  display:grid;
+  gap:10px;
+}
+
+.toggle{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:13px;
+  color:var(--text-dim);
+}
+
+.toggle input{
+  accent-color:var(--accent);
+  width:15px;
+  height:15px;
+}
+
+.target-row{
+  margin-top:20px;
+}
+
+.segmented{
+  display:flex;
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  margin-top:8px;
+  width:fit-content;
+}
+
+.seg-btn{
+  background:var(--bg-panel-2);
+  border:none;
+  color:var(--text-dim);
+  font-size:13px;
+  padding:7px 14px;
+}
+
+.seg-btn.is-active{
+  background:var(--accent-soft);
+  color:var(--accent);
+}
+
+.run-btn{
+  width:100%;
+  margin-top:22px;
+  background:var(--accent);
+  color:#0A0B0D;
+  font-weight:600;
+  font-size:14px;
+  border:none;
+  border-radius:8px;
+  padding:12px;
+  transition:opacity .15s;
+}
+
+.run-btn:hover{
+  opacity:.88;
+}
+
+.run-btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+}
+
+.run-error{
+  color:#FF6C6C;
+  font-size:13px;
+  margin:10px 0 0;
+  min-height:16px;
+}
+
+/* =========================
+   RESULT
+========================= */
+
+.result{
+  padding-bottom:72px;
+}
+
+.result-stats{
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--text-dim);
+}
+
+.result-textarea{
+  min-height:260px;
+}
+
+.result-actions{
+  display:flex;
+  gap:10px;
+  margin-top:14px;
+}
+
+.secondary-btn{
+  background:var(--bg-panel-2);
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:12px 18px;
+  font-size:14px;
+}
+
+.secondary-btn:hover{
+  border-color:var(--accent-dim);
+}
+
+.result-actions .run-btn{
+  width:auto;
+  flex:1;
+  margin-top:0;
+}
+
+/* =========================
+   FOOTER
+========================= */
+
+.footer{
+  border-top:1px solid var(--border-soft);
+  padding:24px 0 40px;
+}
+
+.footer .wrap{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  font-family:var(--mono);
+  font-size:12px;
+  color:var(--text-faint);
+}
+
+.footer-powered{
+  color:var(--text-faint);
+  text-align:center;
+}
+
+.footer-powered strong{
+  color:var(--accent);
+  font-weight:600;
+}
+
+.footer-dim{
+  color:var(--text-faint);
+}
+
+@media(max-width:820px){
+
+  .bench-inner{
+    grid-template-columns:1fr;
+  }
+
+  .steps-inner{
+    grid-template-columns:1fr;
+    gap:20px;
+  }
+
+  .footer .wrap{
+    flex-direction:column;
+    gap:8px;
+    align-items:flex-start;
+  }
+
+  .footer-powered{
+    text-align:left;
+  }
+}
+
+@media(max-width:600px){
+
+  .topbar-inner{
+    flex-wrap:wrap;
+  }
+
+  .topbar-tag{
+    width:100%;
+    order:3;
+  }
+
+  .translate-btn{
+    margin-left:auto;
+  }
+
+  .hero{
+    padding-top:48px;
+  }
+
+  .hero-sub{
+    font-size:15px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     TOPBAR
+========================= -->
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+
+    <span class="brand">
+      obfr<span class="brand-dot">_</span>
+    </span>
+
+    <span class="topbar-tag" id="topbarTag">
+      obfuscateur js — 100% navigateur
+    </span>
+
+    <button
+      type="button"
+      class="translate-btn"
+      id="translateBtn"
+      aria-label="Changer la langue"
+    >
+      FR / EN
+    </button>
+
+  </div>
+</header>
+
+<main>
+
+<!-- =========================
+     HERO
+========================= -->
+
+<section class="hero">
+
+  <div class="wrap hero-inner">
+
+    <h1 class="hero-title">
+      <span id="heroTitle">
+        Rends ton code
+      </span><br>
+
+      <span
+        class="scramble-word"
+        id="scrambleWord"
+      >illisible</span>.
+    </h1>
+
+    <p class="hero-sub" id="heroSub">
+      Colle ou dépose un fichier .js, choisis le niveau de protection,
+      récupère une version obfusquée. Tout se passe dans ton navigateur —
+      rien n'est envoyé nulle part.
+    </p>
+
+    <div class="hero-demo" aria-hidden="true">
+
+      <div class="demo-line demo-head">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+
+        <span class="demo-filename">
+          payload.js
+        </span>
+      </div>
+
+      <pre class="demo-code" id="demoCode"></pre>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     STEPS
+========================= -->
+
+<section class="steps">
+
+  <div class="wrap steps-inner">
+
+    <div class="step">
+      <span class="step-num">01</span>
+
+      <h3 id="step1Title">
+        Dépose ton fichier
+      </h3>
+
+      <p id="step1Text">
+        .js, .mjs ou .cjs — ou colle le code directement.
+      </p>
+    </div>
+
+    <div class="step">
+      <span class="step-num">02</span>
+
+      <h3 id="step2Title">
+        Choisis le niveau
+      </h3>
+
+      <p id="step2Text">
+        Léger, moyen ou lourd — ou règle chaque option toi-même.
+      </p>
+    </div>
+
+    <div class="step">
+      <span class="step-num">03</span>
+
+      <h3 id="step3Title">
+        Récupère le résultat
+      </h3>
+
+      <p id="step3Text">
+        Copie ou télécharge le fichier obfusqué directement.
+      </p>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     WORKBENCH
+========================= -->
+
+<section class="bench">
+
+  <div class="wrap bench-inner">
+
+    <!-- SOURCE -->
+
+    <div class="panel dropzone-panel">
+
+      <div class="panel-head">
+        <span
+          class="panel-label"
+          id="sourceLabel"
+        >Source</span>
+      </div>
+
+      <div class="dropzone" id="dropzone">
+
+        <input
+          type="file"
+          id="fileInput"
+          accept=".js,.mjs,.cjs"
+          hidden
+        >
+
+        <p
+          class="dz-title"
+          id="dropTitle"
+        >
+          Glisse ton fichier ici
+        </p>
+
+        <p class="dz-sub">
+
+          <span id="orBrowse">
+            ou
+          </span>
+
+          <button
+            type="button"
+            class="link-btn"
+            id="browseBtn"
+          >
+            parcourir
+          </button>
+
+        </p>
+
+        <p
+          class="dz-file"
+          id="dzFile"
+        ></p>
+
+      </div>
+
+      <div class="or-row">
+        <span id="pasteLabel">
+          ou colle ton code
+        </span>
+      </div>
+
+      <textarea
+        id="codeInput"
+        class="code-textarea"
+        placeholder="function hello() {
+  console.log('salut');
+}"
+        spellcheck="false"
+      ></textarea>
+
+    </div>
+
+    <!-- OPTIONS -->
+
+    <div class="panel options-panel">
+
+      <div class="panel-head">
+        <span
+          class="panel-label"
+          id="levelLabel"
+        >Niveau</span>
+      </div>
+
+      <div
+        class="preset-row"
+        id="presetRow"
+      >
+
+        <button
+          type="button"
+          class="preset-btn"
+          data-preset="light"
+        >
+          <span
+            class="preset-name"
+            id="lightName"
+          >
+            Léger
+          </span>
+
+          <span
+            class="preset-desc"
+            id="lightDesc"
+          >
+            Noms renommés, chaînes cachées
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="preset-btn is-active"
+          data-preset="medium"
+        >
+          <span
+            class="preset-name"
+            id="mediumName"
+          >
+            Moyen
+          </span>
+
+          <span
+            class="preset-desc"
+            id="mediumDesc"
+          >
+            + flux de contrôle, auto-défense
+          </span>
+        </button>
+
+        <button
+          type="button"
+          class="preset-btn"
+          data-preset="heavy"
+        >
+          <span
+            class="preset-name"
+            id="heavyName"
+          >
+            Lourd
+          </span>
+
+          <span
+            class="preset-desc"
+            id="heavyDesc"
+          >
+            + anti-debug, exécution ralentie
+          </span>
+        </button>
+
+      </div>
+
+      <div class="panel-head panel-head-sub">
+
+        <span
+          class="panel-label"
+          id="optionsLabel"
+        >Options</span>
+
+      </div>
+
+      <div class="toggle-list">
+
+        <label class="toggle">
+
+          <input
+            type="checkbox"
+            id="optSelfDefending"
+            checked
+          >
+
+          <span id="selfDefendingText">
+            Auto-défense (casse si reformaté)
+          </span>
+
+        </label>
+
+        <label class="toggle">
+
+          <input
+            type="checkbox"
+            id="optDebugProtection"
+          >
+
+          <span id="debugProtectionText">
+            Anti-debug (bloque devtools)
+          </span>
+
+        </label>
+
+        <label class="toggle">
+
+          <input
+            type="checkbox"
+            id="optConsole"
+          >
+
+          <span id="consoleText">
+            Désactiver console.log
+          </span>
+
+        </label>
+
+        <label class="toggle">
+
+          <input
+            type="checkbox"
+            id="optRenameGlobals"
+          >
+
+          <span id="renameGlobalsText">
+            Renommer variables globales
+          </span>
+
+        </label>
+
+      </div>
+
+      <div class="target-row">
+
+        <span
+          class="panel-label"
+          id="targetLabel"
+        >Cible</span>
+
+        <div
+          class="segmented"
+          id="targetSeg"
+        >
+
+          <button
+            type="button"
+            class="seg-btn is-active"
+            data-target="node"
+            id="nodeBtn"
+          >
+            Node.js
+          </button>
+
+          <button
+            type="button"
+            class="seg-btn"
+            data-target="browser"
+            id="browserBtn"
+          >
+            Navigateur
+          </button>
+
+        </div>
+
+      </div>
+
+      <button
+        type="button"
+        class="run-btn"
+        id="runBtn"
+      >
+        Obfusquer
+      </button>
+
+      <p
+        class="run-error"
+        id="runError"
+      ></p>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- =========================
+     RESULT
+========================= -->
+
+<section
+  class="result"
+  id="resultSection"
+  hidden
+>
+
+  <div class="wrap result-inner">
+
+    <div class="panel result-panel">
+
+      <div class="panel-head">
+
+        <span
+          class="panel-label"
+          id="resultLabel"
+        >
+          Résultat
+        </span>
+
+        <span
+          class="result-stats"
+          id="resultStats"
+        ></span>
+
+      </div>
+
+      <textarea
+        id="resultOutput"
+        class="code-textarea result-textarea"
+        readonly
+        spellcheck="false"
+      ></textarea>
+
+      <div class="result-actions">
+
+        <button
+          type="button"
+          class="secondary-btn"
+          id="copyBtn"
+        >
+          Copier
+        </button>
+
+        <button
+          type="button"
+          class="run-btn"
+          id="downloadBtn"
+        >
+          Télécharger
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer class="footer">
+
+  <div class="wrap">
+
+    <span>
+      obfr
+    </span>
+
+    <span class="footer-powered">
+      POWERED BY
+      <strong>DYBY TECH</strong>
+    </span>
+
+    <span
+      class="footer-dim"
+      id="footerText"
+    >
+      obfuscation locale — aucune donnée ne quitte ton navigateur.
+    </span>
+
+  </div>
+
+</footer>
+
+<script>
+
+/* =========================================================
+   TEXT SCRAMBLE
+========================================================= */
+
+const SCRAMBLE_CHARS =
+  "!<>-_\\/[]{}—=+*^?#________";
+
+class TextScramble {
+
+  constructor(el){
+
+    this.el = el;
+    this.frame = 0;
+    this.queue = [];
+    this.update = this.update.bind(this);
+
+  }
+
+  setText(newText){
+
+    const oldText = this.el.textContent;
+
+    const length =
+      Math.max(
+        oldText.length,
+        newText.length
+      );
+
+    this.queue = [];
+
+    for(let i = 0; i < length; i++){
+
+      const from = oldText[i] || "";
+      const to = newText[i] || "";
+
+      const start =
+        Math.floor(Math.random() * 20);
+
+      const end =
+        start +
+        Math.floor(Math.random() * 20);
+
+      this.queue.push({
+        from,
+        to,
+        start,
+        end
+      });
+
+    }
+
+    cancelAnimationFrame(this.frameReq);
+
+    this.frame = 0;
+
+    return new Promise(resolve => {
+
+      this.resolve = resolve;
+
+      this.update();
+
+    });
+
+  }
+
+  update(){
+
+    let output = "";
+    let complete = 0;
+
+    for(let i = 0; i < this.queue.length; i++){
+
+      let {
+        from,
+        to,
+        start,
+        end,
+        char
+      } = this.queue[i];
+
+      if(this.frame >= end){
+
+        complete++;
+
+        output += to;
+
+      }
+
+      else if(this.frame >= start){
+
+        if(
+          !char ||
+          Math.random() < .28
+        ){
+
+          char =
+            SCRAMBLE_CHARS[
+              Math.floor(
+                Math.random() *
+                SCRAMBLE_CHARS.length
+              )
+            ];
+
+          this.queue[i].char = char;
+
+        }
+
+        output +=
+          `<span class="scr-tick">${char}</span>`;
+
+      }
+
+      else{
+
+        output += from;
+
+      }
+
+    }
+
+    this.el.innerHTML = output;
+
+    if(complete === this.queue.length){
+
+      this.resolve();
+
+    }
+
+    else{
+
+      this.frameReq =
+        requestAnimationFrame(
+          this.update
+        );
+
+      this.frame++;
+
+    }
+
+  }
+
+}
+
+const words = [
+  "illisible",
+  "opaque",
+  "verrouillé",
+  "protégé"
+];
+
+const scrambleEl =
+  document.getElementById(
+    "scrambleWord"
+  );
+
+if(scrambleEl){
+
+  const fx =
+    new TextScramble(scrambleEl);
+
+  let i = 0;
+
+  const next = () => {
+
+    fx.setText(words[i]).then(() => {
+
+      setTimeout(
+        next,
+        2200
+      );
+
+    });
+
+    i =
+      (i + 1) %
+      words.length;
+
+  };
+
+  next();
+
+}
+
+/* =========================================================
+   HERO DEMO
+========================================================= */
+
+const demoEl =
+  document.getElementById(
+    "demoCode"
+  );
+
+const CLEAN_SNIPPET =
+`function greet(name) {
+  console.log("Hello, " + name);
+  return true;
+}`;
+
+const OBF_SNIPPET =
+`const _0x4a1f=['\\\\x48\\\\x65\\\\x6c\\\\x6c\\\\x6f'];(function(_0x2b,_0x3c){const _0x1d=function(_0x5e){while(--_0x5e){_0x2b['push'](_0x2b['shift']());}};_0x1d(++_0x3c);}(_0x4a1f,0x1a2));function _0x2f(_0x1a,_0x2c){/* ... */}`;
+
+if(demoEl){
+
+  demoEl.textContent =
+    CLEAN_SNIPPET;
+
+  let showingClean = true;
+
+  setInterval(() => {
+
+    const target =
+      showingClean
+        ? OBF_SNIPPET
+        : CLEAN_SNIPPET;
+
+    demoEl.style.opacity = 0;
+
+    setTimeout(() => {
+
+      demoEl.textContent = target;
+
+      demoEl.style.transition =
+        "opacity .4s";
+
+      demoEl.style.opacity = 1;
+
+    },220);
+
+    showingClean =
+      !showingClean;
+
+  },2600);
+
+}
+
+/* =========================================================
+   FILE / DROPZONE
+========================================================= */
+
+const dropzone =
+  document.getElementById(
+    "dropzone"
+  );
+
+const fileInput =
+  document.getElementById(
+    "fileInput"
+  );
+
+const browseBtn =
+  document.getElementById(
+    "browseBtn"
+  );
+
+const dzFile =
+  document.getElementById(
+    "dzFile"
+  );
+
+const codeInput =
+  document.getElementById(
+    "codeInput"
+  );
+
+browseBtn.addEventListener(
+  "click",
+  () => fileInput.click()
+);
+
+dropzone.addEventListener(
+  "click",
+  e => {
+
+    if(e.target === browseBtn)
+      return;
+
+    fileInput.click();
+
+  }
+);
+
+fileInput.addEventListener(
+  "change",
+  () => {
+
+    if(fileInput.files[0]){
+
+      loadFile(
+        fileInput.files[0]
+      );
+
+    }
+
+  }
+);
+
+[
+  "dragenter",
+  "dragover"
+].forEach(evt => {
+
+  dropzone.addEventListener(
+    evt,
+    e => {
+
+      e.preventDefault();
+
+      dropzone.classList.add(
+        "is-drag"
+      );
+
+    }
+  );
+
+});
+
+[
+  "dragleave",
+  "drop"
+].forEach(evt => {
+
+  dropzone.addEventListener(
+    evt,
+    e => {
+
+      e.preventDefault();
+
+      dropzone.classList.remove(
+        "is-drag"
+      );
+
+    }
+  );
+
+});
+
+dropzone.addEventListener(
+  "drop",
+  e => {
+
+    const file =
+      e.dataTransfer.files[0];
+
+    if(file){
+
+      loadFile(file);
+
+    }
+
+  }
+);
+
+function loadFile(file){
+
+  const reader =
+    new FileReader();
+
+  reader.onload = () => {
+
+    codeInput.value =
+      reader.result;
+
+    dzFile.textContent =
+      `${file.name} — ${(file.size / 1024).toFixed(1)} Ko`;
+
+    lastFilename =
+      file.name.replace(
+        /\.(js|mjs|cjs)$/i,
+        ""
+      ) + ".obf.js";
+
+  };
+
+  reader.readAsText(file);
+
+}
+
+/* =========================================================
+   PRESETS
+========================================================= */
+
+let currentPreset = "medium";
+
+const presetButtons =
+  document.querySelectorAll(
+    ".preset-btn"
+  );
+
+presetButtons.forEach(btn => {
+
+  btn.addEventListener(
+    "click",
+    () => {
+
+      presetButtons.forEach(
+        b =>
+          b.classList.remove(
+            "is-active"
+          )
+      );
+
+      btn.classList.add(
+        "is-active"
+      );
+
+      currentPreset =
+        btn.dataset.preset;
+
+    }
+  );
+
+});
+
+/* =========================================================
+   TARGET
+========================================================= */
+
+let currentTarget = "node";
+
+const segButtons =
+  document.querySelectorAll(
+    ".seg-btn"
+  );
+
+segButtons.forEach(btn => {
+
+  btn.addEventListener(
+    "click",
+    () => {
+
+      segButtons.forEach(
+        b =>
+          b.classList.remove(
+            "is-active"
+          )
+      );
+
+      btn.classList.add(
+        "is-active"
+      );
+
+      currentTarget =
+        btn.dataset.target;
+
+    }
+  );
+
+});
+
+/* =========================================================
+   OBFUSCATION PRESETS
+========================================================= */
+
+const PRESETS = {
+
+  light: {
+
+    compact:true,
+
+    controlFlowFlattening:false,
+
+    deadCodeInjection:false,
+
+    stringArray:true,
+
+    stringArrayEncoding:[],
+
+    stringArrayThreshold:.5,
+
+    identifierNamesGenerator:
+      "hexadecimal"
+
+  },
+
+  medium: {
+
+    compact:true,
+
+    controlFlowFlattening:true,
+
+    controlFlowFlatteningThreshold:.5,
+
+    deadCodeInjection:true,
+
+    deadCodeInjectionThreshold:.3,
+
+    stringArray:true,
+
+    stringArrayEncoding:[
+      "base64"
+    ],
+
+    stringArrayThreshold:.75,
+
+    identifierNamesGenerator:
+      "hexadecimal"
+
+  },
+
+  heavy: {
+
+    compact:true,
+
+    controlFlowFlattening:true,
+
+    controlFlowFlatteningThreshold:1,
+
+    deadCodeInjection:true,
+
+    deadCodeInjectionThreshold:.6,
+
+    stringArray:true,
+
+    stringArrayEncoding:[
+      "rc4"
+    ],
+
+    stringArrayThreshold:1,
+
+    splitStrings:true,
+
+    splitStringsChunkLength:5,
+
+    identifierNamesGenerator:
+      "hexadecimal"
+
+  }
+
+};
+
+/* =========================================================
+   RUN OBFUSCATION
+========================================================= */
+
+const runBtn =
+  document.getElementById(
+    "runBtn"
+  );
+
+const runError =
+  document.getElementById(
+    "runError"
+  );
+
+const resultSection =
+  document.getElementById(
+    "resultSection"
+  );
+
+const resultOutput =
+  document.getElementById(
+    "resultOutput"
+  );
+
+const resultStats =
+  document.getElementById(
+    "resultStats"
+  );
+
+const downloadBtn =
+  document.getElementById(
+    "downloadBtn"
+  );
+
+const copyBtn =
+  document.getElementById(
+    "copyBtn"
+  );
+
+let lastFilename =
+  "code.obf.js";
+
+runBtn.addEventListener(
+  "click",
+  () => {
+
+    runError.textContent = "";
+
+    const sourceCode =
+      codeInput.value;
+
+    if(!sourceCode.trim()){
+
+      runError.textContent =
+        currentLanguage === "fr"
+          ? "Dépose un fichier ou colle du code d'abord."
+          : "Drop a file or paste some code first.";
+
+      return;
+
+    }
+
+    if(
+      typeof JavaScriptObfuscator ===
+      "undefined"
+    ){
+
+      runError.textContent =
+        currentLanguage === "fr"
+          ? "La librairie d'obfuscation n'a pas pu se charger. Une connexion internet est requise."
+          : "The obfuscation library could not be loaded. An internet connection is required.";
+
+      return;
+
+    }
+
+    runBtn.disabled = true;
+
+    runBtn.textContent =
+      currentLanguage === "fr"
+        ? "Obfuscation…"
+        : "Obfuscating…";
+
+    setTimeout(() => {
+
+      try{
+
+        const options = {
+
+          ...PRESETS[
+            currentPreset
+          ],
+
+          target:
+            currentTarget === "browser"
+              ? "browser"
+              : "node",
+
+          selfDefending:
+            document.getElementById(
+              "optSelfDefending"
+            ).checked,
+
+          debugProtection:
+            document.getElementById(
+              "optDebugProtection"
+            ).checked,
+
+          disableConsoleOutput:
+            document.getElementById(
+              "optConsole"
+            ).checked,
+
+          renameGlobals:
+            document.getElementById(
+              "optRenameGlobals"
+            ).checked
+
+        };
+
+        const result =
+          JavaScriptObfuscator.obfuscate(
+            sourceCode,
+            options
+          );
+
+        const obfuscatedCode =
+          result.getObfuscatedCode();
+
+        resultOutput.value =
+          obfuscatedCode;
+
+        resultStats.textContent =
+          `${sourceCode.length} → ${obfuscatedCode.length} caractères`;
+
+        resultSection.hidden =
+          false;
+
+        resultSection.scrollIntoView({
+          behavior:"smooth",
+          block:"start"
+        });
+
+      }
+
+      catch(err){
+
+        runError.textContent =
+          err.message ||
+          (
+            currentLanguage === "fr"
+              ? "Erreur pendant l'obfuscation."
+              : "Obfuscation error."
+          );
+
+      }
+
+      finally{
+
+        runBtn.disabled =
+          false;
+
+        runBtn.textContent =
+          currentLanguage === "fr"
+            ? "Obfusquer"
+            : "Obfuscate";
+
+      }
+
+    },30);
+
+  }
+);
+
+/* =========================================================
+   COPY
+========================================================= */
+
+copyBtn.addEventListener(
+  "click",
+  async () => {
+
+    try{
+
+      await navigator.clipboard.writeText(
+        resultOutput.value
+      );
+
+      const original =
+        copyBtn.textContent;
+
+      copyBtn.textContent =
+        currentLanguage === "fr"
+          ? "Copié"
+          : "Copied";
+
+      setTimeout(
+        () =>
+          copyBtn.textContent =
+            original,
+        1500
+      );
+
+    }
+
+    catch{
+
+      resultOutput.select();
+
+      document.execCommand(
+        "copy"
+      );
+
+    }
+
+  }
+);
+
+/* =========================================================
+   DOWNLOAD
+========================================================= */
+
+downloadBtn.addEventListener(
+  "click",
+  () => {
+
+    const blob =
+      new Blob(
+        [resultOutput.value],
+        {
+          type:"text/javascript"
+        }
+      );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const a =
+      document.createElement(
+        "a"
+      );
+
+    a.href = url;
+
+    a.download =
+      lastFilename;
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    URL.revokeObjectURL(url);
+
+  }
+);
+
+/* =========================================================
+   TRANSLATION
+========================================================= */
+
+const translations = {
+
+  fr: {
+
+    tag:
+      "obfuscateur js — 100% navigateur",
+
+    heroTitle:
+      "Rends ton code",
+
+    heroSub:
+      "Colle ou dépose un fichier .js, choisis le niveau de protection, récupère une version obfusquée. Tout se passe dans ton navigateur — rien n'est envoyé nulle part.",
+
+    step1Title:
+      "Dépose ton fichier",
+
+    step1Text:
+      ".js, .mjs ou .cjs — ou colle le code directement.",
+
+    step2Title:
+      "Choisis le niveau",
+
+    step2Text:
+      "Léger, moyen ou lourd — ou règle chaque option toi-même.",
+
+    step3Title:
+      "Récupère le résultat",
+
+    step3Text:
+      "Copie ou télécharge le fichier obfusqué directement.",
+
+    source:
+      "Source",
+
+    dropTitle:
+      "Glisse ton fichier ici",
+
+    or:
+      "ou",
+
+    browse:
+      "parcourir",
+
+    paste:
+      "ou colle ton code",
+
+    level:
+      "Niveau",
+
+    light:
+      "Léger",
+
+    lightDesc:
+      "Noms renommés, chaînes cachées",
+
+    medium:
+      "Moyen",
+
+    mediumDesc:
+      "+ flux de contrôle, auto-défense",
+
+    heavy:
+      "Lourd",
+
+    heavyDesc:
+      "+ anti-debug, exécution ralentie",
+
+    options:
+      "Options",
+
+    selfDefending:
+      "Auto-défense (casse si reformaté)",
+
+    debugProtection:
+      "Anti-debug (bloque devtools)",
+
+    console:
+      "Désactiver console.log",
+
+    renameGlobals:
+      "Renommer variables globales",
+
+    target:
+      "Cible",
+
+    browser:
+      "Navigateur",
+
+    obfuscate:
+      "Obfusquer",
+
+    result:
+      "Résultat",
+
+    copy:
+      "Copier",
+
+    download:
+      "Télécharger",
+
+    footer:
+      "obfuscation locale — aucune donnée ne quitte ton navigateur."
+
+  },
+
+  en: {
+
+    tag:
+      "js obfuscator — 100% browser",
+
+    heroTitle:
+      "Make your code",
+
+    heroSub:
+      "Paste or drop a .js file, choose the protection level, and get an obfuscated version. Everything happens in your browser — nothing is uploaded anywhere.",
+
+    step1Title:
+      "Drop your file",
+
+    step1Text:
+      ".js, .mjs or .cjs — or paste the code directly.",
+
+    step2Title:
+      "Choose the level",
+
+    step2Text:
+      "Light, medium or heavy — or configure every option yourself.",
+
+    step3Title:
+      "Get the result",
+
+    step3Text:
+      "Copy or download the obfuscated file directly.",
+
+    source:
+      "Source",
+
+    dropTitle:
+      "Drop your file here",
+
+    or:
+      "or",
+
+    browse:
+      "browse",
+
+    paste:
+      "or paste your code",
+
+    level:
+      "Level",
+
+    light:
+      "Light",
+
+    lightDesc:
+      "Renamed identifiers, hidden strings",
+
+    medium:
+      "Medium",
+
+    mediumDesc:
+      "+ control flow, self-defense",
+
+    heavy:
+      "Heavy",
+
+    heavyDesc:
+      "+ anti-debug, slower execution",
+
+    options:
+      "Options",
+
+    selfDefending:
+      "Self-defense (breaks if reformatted)",
+
+    debugProtection:
+      "Anti-debug (blocks devtools)",
+
+    console:
+      "Disable console.log",
+
+    renameGlobals:
+      "Rename global variables",
+
+    target:
+      "Target",
+
+    browser:
+      "Browser",
+
+    obfuscate:
+      "Obfuscate",
+
+    result:
+      "Result",
+
+    copy:
+      "Copy",
+
+    download:
+      "Download",
+
+    footer:
+      "local obfuscation — no data leaves your browser."
+
+  }
+
+};
+
+let currentLanguage =
+  localStorage.getItem(
+    "obfr-language"
+  ) || "fr";
+
+function translatePage(){
+
+  const t =
+    translations[
+      currentLanguage
+    ];
+
+  document.documentElement.lang =
+    currentLanguage;
+
+  document.getElementById(
+    "topbarTag"
+  ).textContent =
+    t.tag;
+
+  document.getElementById(
+    "heroTitle"
+  ).textContent =
+    t.heroTitle;
+
+  document.getElementById(
+    "heroSub"
+  ).textContent =
+    t.heroSub;
+
+  document.getElementById(
+    "step1Title"
+  ).textContent =
+    t.step1Title;
+
+  document.getElementById(
+    "step1Text"
+  ).textContent =
+    t.step1Text;
+
+  document.getElementById(
+    "step2Title"
+  ).textContent =
+    t.step2Title;
+
+  document.getElementById(
+    "step2Text"
+  ).textContent =
+    t.step2Text;
+
+  document.getElementById(
+    "step3Title"
+  ).textContent =
+    t.step3Title;
+
+  document.getElementById(
+    "step3Text"
+  ).textContent =
+    t.step3Text;
+
+  document.getElementById(
+    "sourceLabel"
+  ).textContent =
+    t.source;
+
+  document.getElementById(
+    "dropTitle"
+  ).textContent =
+    t.dropTitle;
+
+  document.getElementById(
+    "orBrowse"
+  ).textContent =
+    t.or + " ";
+
+  document.getElementById(
+    "browseBtn"
+  ).textContent =
+    t.browse;
+
+  document.getElementById(
+    "pasteLabel"
+  ).textContent =
+    t.paste;
+
+  document.getElementById(
+    "levelLabel"
+  ).textContent =
+    t.level;
+
+  document.getElementById(
+    "lightName"
+  ).textContent =
+    t.light;
+
+  document.getElementById(
+    "lightDesc"
+  ).textContent =
+    t.lightDesc;
+
+  document.getElementById(
+    "mediumName"
+  ).textContent =
+    t.medium;
+
+  document.getElementById(
+    "mediumDesc"
+  ).textContent =
+    t.mediumDesc;
+
+  document.getElementById(
+    "heavyName"
+  ).textContent =
+    t.heavy;
+
+  document.getElementById(
+    "heavyDesc"
+  ).textContent =
+    t.heavyDesc;
+
+  document.getElementById(
+    "optionsLabel"
+  ).textContent =
+    t.options;
+
+  document.getElementById(
+    "selfDefendingText"
+  ).textContent =
+    t.selfDefending;
+
+  document.getElementById(
+    "debugProtectionText"
+  ).textContent =
+    t.debugProtection;
+
+  document.getElementById(
+    "consoleText"
+  ).textContent =
+    t.console;
+
+  document.getElementById(
+    "renameGlobalsText"
+  ).textContent =
+    t.renameGlobals;
+
+  document.getElementById(
+    "targetLabel"
+  ).textContent =
+    t.target;
+
+  document.getElementById(
+    "browserBtn"
+  ).textContent =
+    t.browser;
+
+  document.getElementById(
+    "runBtn"
+  ).textContent =
+    t.obfuscate;
+
+  document.getElementById(
+    "resultLabel"
+  ).textContent =
+    t.result;
+
+  document.getElementById(
+    "copyBtn"
+  ).textContent =
+    t.copy;
+
+  document.getElementById(
+    "downloadBtn"
+  ).textContent =
+    t.download;
+
+  document.getElementById(
+    "footerText"
+  ).textContent =
+    t.footer;
+
+  document.getElementById(
+    "translateBtn"
+  ).textContent =
+    currentLanguage === "fr"
+      ? "FR / EN"
+      : "EN / FR";
+
+}
+
+document
+  .getElementById(
+    "translateBtn"
+  )
+  .addEventListener(
+    "click",
+    () => {
+
+      currentLanguage =
+        currentLanguage === "fr"
+          ? "en"
+          : "fr";
+
+      localStorage.setItem(
+        "obfr-language",
+        currentLanguage
+      );
+
+      translatePage();
+
+    }
+  );
+
+translatePage();
+
+</script>
+
+</body>
+</html>
+Cette version conserve ton fonctionnement d'obfuscation, ajoute FR / EN, mémorise la langue choisie, et affiche POWERED BY DYBY TECH dans le footer.
